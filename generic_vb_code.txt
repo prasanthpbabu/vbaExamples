@@ -1,0 +1,47 @@
+Sub Button1_Click()
+
+'Finds the last non-blank cell in a single row or column
+Dim lRow As Long
+Dim lCol As Long
+
+    
+    'Find the last non-blank cell in column A(1)
+    lRow = Sheet1.Cells(Rows.Count, 1).End(xlUp).Row
+    
+    For i = 1 To lRow
+    'Find the last non-blank cell in row 1
+    lCol = Sheet1.Cells(i, Columns.Count).End(xlToLeft).Column
+        For j = 1 To lCol
+        cell_val = Sheet1.Cells(i, j).Value
+            If InStr(1, cell_val, "PLC5.") = 1 Then
+                last_val = Split(cell_val, ":")(1)
+                first_val = Split(cell_val, ":")(0)
+                If InStr(last_val, "/") > 0 Then
+                    'get denominal value and upper value if there is "/"
+                    oct_val = Mid(last_val, InStr(last_val, "/") + 1)
+                    top_val = Left(last_val, InStr(last_val, "/") - 1)
+                    On Error Resume Next
+                    lngValue = CLng("&O" & CStr(oct_val))   'convert to decimal
+                    If Err.Number <> 0 Then   'if error replace string with same string
+                    Err.Clear
+                    replace_str = cell_val
+                    Else
+                    replace_str = first_val & ":" & top_val & "/" & lngValue
+                    End If
+                Else
+                    oct_val = last_val
+                    On Error Resume Next
+                    lngValue = CLng("&O" & CStr(oct_val))
+                    If Err.Number <> 0 Then
+                    Err.Clear
+                    replace_str = cell_val
+                    Else
+                    replace_str = first_val & ":" & lngValue
+                    End If
+                End If
+                Sheet2.Cells(i, j).Value = replace_str
+            End If
+        Next j
+    Next i
+
+End Sub
